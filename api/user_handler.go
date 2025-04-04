@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/qppffod/reservation-api/db"
+	"github.com/qppffod/reservation-api/types"
 )
 
 type UserHandler struct {
@@ -27,5 +28,29 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
-	return c.JSON("many users")
+	users, err := h.userStore.GetUsers(c.Context())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(users)
+}
+
+func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+	var params types.CreateUserParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	user, err := types.NewUserFromParams(&params)
+	if err != nil {
+		return err
+	}
+
+	user, err = h.userStore.InsertUser(c.Context(), user)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(user)
 }
