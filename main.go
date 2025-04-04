@@ -42,6 +42,7 @@ func main() {
 
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Get("/user", userHandler.HandleGetUsers)
+	apiv1.Post("/user", userHandler.HandlePostUser)
 
 	log.Printf("Listening on port %s\n", *listenAddr)
 	app.Listen(*listenAddr)
