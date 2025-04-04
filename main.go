@@ -14,6 +14,12 @@ import (
 
 var dburi = "mongodb://localhost:27017"
 
+var config = fiber.Config{
+	ErrorHandler: func(c *fiber.Ctx, err error) error {
+		return c.JSON(map[string]string{"error": err.Error()})
+	},
+}
+
 func main() {
 	listenAddr := flag.String("listenAddr", ":3000", "listen address of http server")
 	flag.Parse()
@@ -31,7 +37,7 @@ func main() {
 
 	userHandler := api.NewUserHandler(userStore)
 
-	app := fiber.New()
+	app := fiber.New(config)
 	apiv1 := app.Group("/api/v1")
 
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
