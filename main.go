@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/qppffod/reservation-api/api"
+	"github.com/qppffod/reservation-api/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -27,12 +27,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(client)
+	userStore := db.NewMongoUserStore(client, db.DBNAME)
+
+	userHandler := api.NewUserHandler(userStore)
 
 	app := fiber.New()
 	apiv1 := app.Group("/api/v1")
 
-	apiv1.Get("/", api.HandleGetUser)
+	apiv1.Get("/user/:id", userHandler.HandleGetUser)
+	apiv1.Get("/user", userHandler.HandleGetUsers)
 
 	log.Printf("Listening on port %s\n", *listenAddr)
 	app.Listen(*listenAddr)
