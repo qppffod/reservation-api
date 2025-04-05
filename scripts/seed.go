@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/qppffod/reservation-api/db"
@@ -12,24 +11,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func main() {
-	ctx := context.Background()
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
-	if err != nil {
-		log.Fatal(err)
-	}
+var (
+	client     *mongo.Client
+	hotelStore db.HotelStore
+	roomStore  db.RoomStore
+	ctx        = context.Background()
+)
 
-	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
-		log.Fatal(err)
-	}
-
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
-
+func seedHotel(name, location string, rating int) {
 	hotel := types.Hotel{
-		Name:     "Bellucia",
-		Location: "France",
+		Name:     name,
+		Location: location,
 		Rooms:    []primitive.ObjectID{},
+		Rating:   rating,
 	}
 
 	rooms := []types.Room{
@@ -51,13 +45,31 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, room := range rooms {
 		room.HotelID = insertedHotel.ID
-		insertedRoom, err := roomStore.InsertRoom(ctx, &room)
+		_, err := roomStore.InsertRoom(ctx, &room)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(insertedRoom)
 	}
+}
+
+func main() {
+	seedHotel("Bellucia", "France", 3)
+	seedHotel("Legoland", "Denmark", 4)
+	seedHotel("Random Hotel", "Spain", 1)
+}
+
+func init() {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+
+	hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 }
