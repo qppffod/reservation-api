@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/qppffod/reservation-api/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type RoomStore interface {
 	InsertRoom(context.Context, *types.Room) (*types.Room, error)
+	GetRoomsByHotelID(context.Context, string) ([]*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -40,4 +42,23 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 	}
 
 	return room, nil
+}
+
+func (s *MongoRoomStore) GetRoomsByHotelID(ctx context.Context, id string) ([]*types.Room, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	cur, err := s.coll.Find(ctx, bson.M{"hotelID": oid})
+	if err != nil {
+		return nil, err
+	}
+
+	var rooms []*types.Room
+	if err := cur.All(ctx, &rooms); err != nil {
+		return nil, err
+	}
+
+	return rooms, nil
 }
