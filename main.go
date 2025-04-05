@@ -31,18 +31,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	userStore := db.NewMongoUserStore(client, db.DBNAME)
+	var (
+		// stores
+		userStore  = db.NewMongoUserStore(client, db.DBNAME)
+		hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
+		roomStore  = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 
-	userHandler := api.NewUserHandler(userStore)
+		// handlers
+		userHandler  = api.NewUserHandler(userStore)
+		hotelHandler = api.NewHotelHandler(hotelStore, roomStore)
 
-	app := fiber.New(config)
-	apiv1 := app.Group("/api/v1")
+		app   = fiber.New(config)
+		apiv1 = app.Group("/api/v1")
+	)
 
+	// user routes
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Get("/user", userHandler.HandleGetUsers)
 	apiv1.Post("/user", userHandler.HandlePostUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
+
+	// hotel routes
+	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
 
 	log.Printf("Listening on port %s\n", *listenAddr)
 	app.Listen(*listenAddr)
