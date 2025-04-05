@@ -12,6 +12,7 @@ import (
 type HotelStore interface {
 	InsertHotel(context.Context, *types.Hotel) (*types.Hotel, error)
 	UpdateHotel(context.Context, *types.Room) error
+	GetHotels(context.Context) ([]*types.Hotel, error)
 }
 
 type MongoHotelStore struct {
@@ -42,4 +43,18 @@ func (s *MongoHotelStore) UpdateHotel(ctx context.Context, room *types.Room) err
 
 	_, err := s.coll.UpdateByID(ctx, room.HotelID, update)
 	return err
+}
+
+func (s *MongoHotelStore) GetHotels(ctx context.Context) ([]*types.Hotel, error) {
+	cur, err := s.coll.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	var hotels []*types.Hotel
+	if err := cur.All(ctx, &hotels); err != nil {
+		return nil, err
+	}
+
+	return hotels, nil
 }
