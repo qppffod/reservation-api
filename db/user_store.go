@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/qppffod/reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -9,7 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type Dropper interface {
+	Drop(context.Context) error
+}
+
 type UserStore interface {
+	Dropper
+
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
@@ -27,6 +34,11 @@ func NewMongoUserStore(client *mongo.Client, dbname string) *MongoUserStore {
 		client: client,
 		coll:   client.Database(dbname).Collection("users"),
 	}
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Println("--- Dropping user collection")
+	return s.coll.Drop(ctx)
 }
 
 func (s *MongoUserStore) UpdateUser(ctx context.Context, params *types.UpdateUserParams, id string) error {
