@@ -51,15 +51,15 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 
 func createTokenFromUser(user *types.User) string {
 	now := time.Now()
-	validTill := now.Add(time.Hour * 4)
+	expires := now.Add(time.Hour * 4).Unix()
 	claims := jwt.MapClaims{
-		"id":        user.ID,
-		"email":     user.Email,
-		"validTill": validTill,
+		"id":      user.ID,
+		"email":   user.Email,
+		"expires": expires,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := os.Getenv("JWT_TOKEN")
+	secret := os.Getenv("JWT_SECRET")
 	tokenStr, err := token.SignedString([]byte(secret))
 	if err != nil {
 		fmt.Println("failed to sign token:", err)
