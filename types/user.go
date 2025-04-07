@@ -15,6 +15,16 @@ const (
 	minPasswordNameLen = 7
 )
 
+type AuthParams struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthResponse struct {
+	User  *User  `json:"user"`
+	Token string `json:"token"`
+}
+
 type UpdateUserParams struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -56,6 +66,11 @@ func (params CreateUserParams) Validate() map[string]string {
 	}
 
 	return errors
+}
+
+func IsValidPassword(encpw, pw string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
+
 }
 
 func isEmailValid(e string) bool {
