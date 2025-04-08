@@ -73,11 +73,12 @@ func main() {
 	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRoomsByHotelID)
 
 	// room handlers
-	apiv1.Get("/room", roomHandler.HandleGetRooms) // <--- Not implemented
+	apiv1.Get("/room", roomHandler.HandleGetRooms)
 	apiv1.Post("/room/:id/book", roomHandler.HandleBookRoom)
 
 	// booking handlers
 	apiv1.Get("/booking/:id", bookingHandler.HandleGetBooking)
+	apiv1.Get("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
 
 	// admin
 	admin.Get("/booking", bookingHandler.HandleGetBookings)
