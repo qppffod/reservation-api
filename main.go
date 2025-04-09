@@ -7,15 +7,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/qppffod/reservation-api/api"
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var config = fiber.Config{
-	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		return c.JSON(map[string]string{"error": err.Error()})
-	},
+	ErrorHandler: apiError.ErrorHandler,
 }
 
 func main() {
