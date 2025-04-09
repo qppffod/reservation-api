@@ -1,9 +1,8 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/db"
 )
 
@@ -21,19 +20,16 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 	id := c.Params("id")
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
 	if err != nil {
-		return err
+		return apiError.ErrResourseNotFound("cancel booking")
 	}
 
 	user, err := getAuthUser(c)
 	if err != nil {
-		return err
+		return apiError.ErrUnAuthorized()
 	}
 
 	if booking.UserID != user.ID {
-		return c.Status(http.StatusUnauthorized).JSON(GenericResponse{
-			Type: "error",
-			Msg:  "unauthorized",
-		})
+		return apiError.ErrUnAuthorized()
 	}
 
 	if err := h.store.Booking.UpdateBooking(c.Context(), id); err != nil {
@@ -50,7 +46,7 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
 	bookings, err := h.store.Booking.GetBookings(c.Context(), nil)
 	if err != nil {
-		return err
+		return apiError.ErrResourseNotFound("bookings")
 	}
 
 	return c.JSON(bookings)
@@ -62,7 +58,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
 	if err != nil {
-		return err
+		return apiError.ErrResourseNotFound("booking")
 	}
 
 	user, err := getAuthUser(c)
@@ -71,10 +67,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	}
 
 	if booking.UserID != user.ID {
-		return c.Status(http.StatusUnauthorized).JSON(GenericResponse{
-			Type: "error",
-			Msg:  "unauthorized",
-		})
+		return apiError.ErrUnAuthorized()
 	}
 
 	return c.JSON(booking)

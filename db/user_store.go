@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -54,7 +55,7 @@ func (s *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (*typ
 func (s *MongoUserStore) UpdateUser(ctx context.Context, params *types.UpdateUserParams, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return apiError.ErrInvalidID()
 	}
 
 	filter := bson.M{"_id": oid}
@@ -71,7 +72,7 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, params *types.UpdateUse
 func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, apiError.ErrInvalidID()
 	}
 
 	var user types.User
@@ -110,7 +111,7 @@ func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*typ
 func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return apiError.ErrInvalidID()
 	}
 
 	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})

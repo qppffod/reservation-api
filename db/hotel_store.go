@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -63,7 +64,7 @@ func (s *MongoHotelStore) GetHotels(ctx context.Context) ([]*types.Hotel, error)
 func (s *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.Hotel, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, apiError.ErrInvalidID()
 	}
 
 	var hotel types.Hotel

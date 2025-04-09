@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/db"
 	"github.com/qppffod/reservation-api/types"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,7 +26,7 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 
 	var params types.UpdateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return apiError.ErrBadRequest()
 	}
 
 	err := h.userStore.UpdateUser(c.Context(), &params, id)
@@ -63,7 +64,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	users, err := h.userStore.GetUsers(c.Context())
 	if err != nil {
-		return err
+		return apiError.ErrResourseNotFound("user")
 	}
 
 	return c.JSON(users)
@@ -72,7 +73,7 @@ func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return apiError.ErrBadRequest()
 	}
 
 	if ers := params.Validate(); len(ers) > 0 {

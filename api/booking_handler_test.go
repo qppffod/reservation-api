@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/db/fixtures"
 	"github.com/qppffod/reservation-api/types"
 )
@@ -75,6 +76,7 @@ func TestAdminGetBookings(t *testing.T) {
 	tdb.teardown(t)
 
 	var (
+		config         = fiber.Config{ErrorHandler: apiError.ErrorHandler}
 		adminUser      = fixtures.AddUser(tdb.store, true, "admin", "admin")
 		user           = fixtures.AddUser(tdb.store, false, "john", "smith")
 		hotel          = fixtures.AddHotel(tdb.store, "Bellucia", "France", 4, nil)
@@ -82,7 +84,7 @@ func TestAdminGetBookings(t *testing.T) {
 		from           = time.Now()
 		till           = time.Now().AddDate(0, 0, 2)
 		booking        = fixtures.AddBooking(tdb.store, user.ID, room.ID, 2, from, till)
-		app            = fiber.New()
+		app            = fiber.New(config)
 		admin          = app.Group("/", JWTAuthentication(tdb.store.User), AdminAuth)
 		bookingHandler = NewBookingHandler(tdb.store)
 	)
@@ -123,7 +125,7 @@ func TestAdminGetBookings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("expected a non 200 response but got %d", resp.StatusCode)
 	}
 

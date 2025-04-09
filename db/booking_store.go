@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/qppffod/reservation-api/api/apiError"
 	"github.com/qppffod/reservation-api/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -68,7 +69,7 @@ func (s *MongoBookingStore) GetBookings(ctx context.Context, booking *types.Book
 func (s *MongoBookingStore) GetBookingByID(ctx context.Context, id string) (*types.Booking, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, apiError.ErrInvalidID()
 	}
 
 	var booking types.Booking
@@ -82,7 +83,7 @@ func (s *MongoBookingStore) GetBookingByID(ctx context.Context, id string) (*typ
 func (s *MongoBookingStore) UpdateBooking(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return apiError.ErrInvalidID()
 	}
 
 	update := bson.M{
